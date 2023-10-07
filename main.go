@@ -4,9 +4,20 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+
+	"github.com/asylcreek/simple-auth-server/database"
 )
 
 func main() {
+	envLoadErr := godotenv.Load()
+
+	if envLoadErr != nil {
+		panic("Failed to load environment variables")
+	}
+
+	database.ConnectDB()
+
 	router := gin.Default()
 
 	router.GET("/ping", func(context *gin.Context) {
