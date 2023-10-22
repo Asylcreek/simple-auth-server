@@ -23,3 +23,15 @@ func AddUser(db *gorm.DB, user *User) error {
 
 	return nil
 }
+
+func GetUserByUsername(db *gorm.DB, username string) (User, error) {
+	var foundUser User
+
+	result := db.Model(User{}).Where("username = ?", username).First(&foundUser)
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return User{}, errors.New("We cannot seem to find that user")
+	}
+
+	return foundUser, nil
+}

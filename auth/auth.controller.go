@@ -10,12 +10,6 @@ import (
 	"github.com/asylcreek/simple-auth-server/user"
 )
 
-type SignUpPostData struct {
-	Username        string `json:"username" binding:"required"`
-	Password        string `json:"password" binding:"required,min=8"`
-	PasswordConfirm string `json:"passwordConfirm" binding:"required,eqfield=Password"`
-}
-
 func signUp(db *gorm.DB, context *gin.Context) {
 	var data SignUpPostData
 
@@ -63,5 +57,43 @@ func signUp(db *gorm.DB, context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"status": "success",
 		"data":   newUser,
+	})
+}
+
+func login(db *gorm.DB, context *gin.Context) {
+	var data LoginPostData
+
+	if err := context.ShouldBindJSON(&data); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	user, err := user.GetUserByUsername(db, data.Username)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid password. Please try again.",
+		})
+
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data":   user,
 	})
 }

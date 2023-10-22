@@ -9,4 +9,6 @@ func Router(db *gorm.DB, router *gin.Engine) {
 	authRouter := router.Group("/auth")
 
 	authRouter.POST("/signup", func(context *gin.Context) { signUp(db, context) })
+
+	authRouter.POST("/login", func(context *gin.Context) { login(db, context) })
 }
